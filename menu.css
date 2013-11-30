@@ -1,0 +1,12 @@
+/* Perspective */
+.sample {
+  color: #ddd;
+  -webkit-transform: translateZ(-250px) rotateY(30deg);
+  -moz-transform: translateZ(-250px) rotateY(30deg);
+  -ms-transform: translateZ(-250px) rotateY(30deg);
+  -o-transform: translateZ(-250px) rotateY(30deg);
+  transform: translateZ(-250px) rotateY(30deg);
+}
+.test .hello {
+  font-size: 12px;
+}
