@@ -11,6 +11,7 @@
     //Library Function of the menu
     menuLib = {
         'menuClass': '',
+        'animEnd': 'webkitAnimationEnd oAnimationEnd MSAnimationEnd animationend',
         'resizeHander' : function(menuClass) {
             // In case of static width neesd to be provided
             
@@ -29,6 +30,7 @@
         },
         'resetSubListPosition': function(menuContainer, transition) {
             sublists = $("ul.sub", menuContainer);
+            sublists.removeAttr('style');
             switch(transition) {
                 case "slide-fade-left": case "inside-slide-fade-left":
                     sublists.css({ 
@@ -37,11 +39,11 @@
                         'opacity': '0'
                     })
                 break; 
-                case "set3": 
+                case "set3": case "set4": case "set5":
                     sublists.css({ 
                         'marginTop': '0',
                         'left' : '0',
-                        'opacity': '0'
+                        'display': 'none'
                     })    
                 break;
             }            
@@ -78,8 +80,19 @@
                     }, function() { mainElement.removeClass('inside-slide-fade-left-animation').hide(); }).addClass('active');
                 break;
                 case "set3":
-                    mainElement.addClass('fade-out-scale-down-animation').css('opacity', 0);
-                    subElement.show().addClass('fade-in-rise-up-animation active').css('opacity', 1);
+                    mainElement.addClass('fade-out-scale-down-animation');
+                    menuLib.hideAfterTransition(mainElement);
+                    subElement.show().addClass('fade-in-rise-up-animation active');
+                break;
+                case "set4":
+                    mainElement.addClass('fade-out-rising-up-animation');
+                    menuLib.hideAfterTransition(mainElement);
+                    subElement.show().addClass('fade-in-rising-up-animation active');
+                break;
+                case "set5":
+                    mainElement.addClass('fade-out-fall-down-animation');
+                    menuLib.hideAfterTransition(mainElement);
+                    subElement.show().addClass('fade-in-falling-down-animation active');                    
                 break;
             }
             $menu.animate({
@@ -110,17 +123,28 @@
 					
                 break;
                 case "set3":
-                    mainElement.addClass('fade-in-scale-up-animation active'); //.css('opacity', 1);
-                    mainElement.on('webkitAnimationEnd oAnimationEnd MSAnimationEnd animationend', function() {
-                        $(this).css('display', 'hone');
-                        
-                    })
-                    subElement.addClass('fade-out-fall-down-animation'); //.css('opacity', 0);
-                    
+                    mainElement.show().addClass('fade-in-scale-up-animation active');                    
+                    subElement.addClass('fade-out-fall-down-animation');
+                    menuLib.hideAfterTransition(subElement);              
                 break;
+                case "set4":
+                    mainElement.show().addClass('fade-in-falling-down-animation active');                    
+                    subElement.addClass('fade-out-fall-down2-animation');
+                    menuLib.hideAfterTransition(subElement);              
+                break;
+                case "set5":
+                    mainElement.show().addClass('fade-in-rising-up-animation active');                    
+                    subElement.addClass('fade-out-rising-up-animation');
+                    menuLib.hideAfterTransition(subElement);  
+                break; 
             }
             $menu.animate({
                 'height' : mainElement.height() + $('.icon', $menu).outerHeight()
+            });
+        },
+        'hideAfterTransition': function(element) {
+            element.on(menuLib.animEnd, function() {
+                $(this).hide().off(menuLib.animEnd);
             });
         }
     }

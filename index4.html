@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        
+        <!-- Required Libraries -->
+        <script src="js/libs/jquery-1.9.0/jquery.min.js"></script>
+        <script src="js/libs/jquery-easing-1.3/jquery.easing.min.js"></script>
+        
+        <!-- Load Menu Specific Files -->
+        <script src="js/menu.js"></script>
+        <link rel="stylesheet" type="text/css" href="css/menu.css" />
+        
+        <script>
+            $(function() {
+                $("#menu").menu({
+                    transition: 'set5'
+                }); 
+            });
+        </script>
+        
+    </head>
+    <body>
+        
+        <div class="container" style="width: 200px;">
+        <div id="menu">
+            <div class="icon">Icon</div>
+            <ul>
+				<li>
+					<a href="#">Demos</a>
+					<ul>
+						<li>
+							<a href="index.html">Demo 1</a>
+						</li>
+						<li>
+							<a href="index2.html">Demo 2</a>
+						</li>
+						<li>
+							<a href="index3.html">Demo 3</a>
+						</li>
+						<li>
+							<a href="index4.html">Demo 4</a>
+						</li>
+						<li>
+							<a href="index5.html">Demo 5</a>
+						</li>
+					</ul>
+				</li>
+                <li>
+                    <a href="#">Link Text</a>
+                    
+                </li>
+                <li>
+                    <a href="#">Link Text</a>
+                    <ul>
+                        <li>
+                            <a href="#">Sub Link Text</a>
+                        </li>
+                        <li>
+                            <a href="#">Sub Link Text</a>
+                        </li>
+                        <li>
+                            <a href="#">Sub Link Text</a>
+                            <ul>
+                                <li>
+                                    <a href="#">Sub Link Text 1 - Sub</a>
+                                </li>
+                                <li>
+                                    <a href="#">Sub Link Text 1 - Sub</a>
+                                </li>
+                                <li>
+                                    <a href="#">Sub Link Text 1 - Sub</a>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">Link Text 2 </a>
+                    <ul>
+                        <li>
+                            <a href="#">Sub Link Text 2</a>
+                        </li>
+                        <li>
+                            <a href="#">Sub Link Text 2</a>
+                        </li>
+                        <li>
+                            <a href="#">Sub Link Text 2</a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+            
+        </div>
+		<div> I am an element just below the menu to check how nice the menu is to me :( </div>
+    </body>
+</html>
