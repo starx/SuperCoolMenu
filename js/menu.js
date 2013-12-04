@@ -8,26 +8,80 @@
 
 
 ;jQuery(function($) {
+    
     //Library Function of the menu
     menuLib = {
-        'menuClass': '',
         'animEnd': 'webkitAnimationEnd oAnimationEnd MSAnimationEnd animationend',
-        'resizeHander' : function(menuClass) {
-            // In case of static width neesd to be provided
-            
-            $('.'+menuClass).each(function() {
-                $(this).width($(this).parent().innerWidth());
-            });
+        'hasAnimation': null,
+        /*
+         * Detects if CSS animations is possible using Modernizr Libraries
+         * @returns {Boolean}
+         */
+        'detectAnimation' : function() {
+            if(!window.Modernizr) return false; // Fail Safe return
+            if(menuLib.hasAnimation === null) {
+                modernizr = window.Modernizr;
+                menuLib.hasAnimation = modernizr.cssanimations && modernizr.csstransitions;
+            }
+            return menuLib.hasAnimation;
         },
+        /*
+         * Set of jQuery Based animations
+         */
+        'animations': {
+            'slideFadeDown': function(el, down, callback) {
+                callback = callback || function() { };                
+                el.animate({
+                   'opacity': '0',
+                   'marginTop': down+'px'
+                }, 400, callback);                
+            },
+            'slideFadeinUp' : function(el, callback) {
+                callback = callback || function() { };                
+                el.animate({
+                   'opacity': '1',
+                   'marginTop': '0px'
+                }, 400, callback);                
+            },
+            'slideFadeLeft' : function(el, opacity, left, callback) {
+                callback = callback || function() { };
+                el.animate({
+                   'opacity': opacity,
+                   'left': left+'px'
+                }, 400, callback);
+            },
+            'slideFadeinLeft' : function(el, left, callback) {
+                menuLib.animations.slideFadeLeft(el, 1, left, callback);
+            },
+            'slideFadeoutLeft' : function(el, left, callback) {
+                menuLib.animations.slideFadeLeft(el, 0, left, callback);
+            }
+                    
+        },
+        /*
+         * Generates a random ID to assign to a menuItem
+         * 
+         * @returns {integer}
+         */
         'genId': function() {
             return 10000 + Math.floor( Math.random() * 90001 );
         },
+        /*
+         * Initializes the submenus for the first time. Set their position and place them in the outer structure
+         * @param {type} menuContainer
+         * @param {type} transition
+         */
         'initSubList': function(menuContainer, transition) {
             
             menuLib.resetSubListPosition(menuContainer, transition);
-            sublists
-                .appendTo(menuContainer); //Move the element to the outer Layer
+            $("ul.sub", menuContainer).appendTo(menuContainer); //Move the sublists to the outer Layer
         },
+        /*
+         * Places the sub menus in appropriate position for each effect
+         * 
+         * @param {jQuery Selector} menuContainer
+         * @param {string} transition
+         */
         'resetSubListPosition': function(menuContainer, transition) {
             sublists = $("ul.sub", menuContainer);
             sublists.removeAttr('style');
@@ -36,7 +90,8 @@
                     sublists.css({ 
                         'marginTop': '0',
                         'left' : menuContainer.width(),
-                        'opacity': '0'
+                        'opacity': '0',
+                        'display': 'none'
                     })
                 break; 
                 case "set3": case "set4": case "set5":
@@ -48,6 +103,12 @@
                 break;
             }            
         },
+        /*
+         * Reset the Menu Position
+         * 
+         * @param {jQuery Selector} menuContainer
+         * @param {string} transition
+         */
         'resetMenu': function(menuContainer, transition) {
             $("ul:first", menuContainer).css({
                 'left': '0',
@@ -57,44 +118,90 @@
             menuLib.resetSubListPosition(menuContainer, transition);
             
         },
+        'menu' : {
+            /**
+             * Open the menu
+             * 
+             * @param {jQuery Selector} menu
+             * @param {JS Object} settings
+             */
+            'open': function(menu, settings) {
+                icon = menu.find('.icon');
+                main_ul = icon.siblings('ul:first');
+                menuLib.animations.slideFadeinUp(main_ul.show().addClass('active'));
+                menu.animate({ 'height' : main_ul.height() + icon.outerHeight() }); //Animate the menu to the new height
+                
+                //Set the Menu's status to opened
+                settings.status = 'opened';                
+            },
+            /**
+             * Close the menu
+             * 
+             * @param {jQuery Selector} menu
+             * @param {JS Object} settings
+             */
+            'close': function(menu, settings) {
+                icon = menu.find('.icon');
+                menuLib.animations.slideFadeDown($("ul.active", menu).removeClass('active'), 20, function() {
+                    menuLib.resetMenu($('.'+ settings.classname), settings.transition);
+                });
+                menu.animate({'height': icon.outerHeight() });
+                
+                //Set the Menu's status to closed
+                settings.status = 'closed';
+            }
+        },
+        /**
+         * Go to the sub menu
+         * 
+         * @param {jQuery Selector} subElement
+         * @param {jQuery Selector} mainElement
+         * @param {jQuery Selector} container
+         * @param {string} transition
+         */
         'goToSub': function(subElement, mainElement, container, transition) {
             $('.active').removeClass('active');
             $menu = mainElement.closest(container);
-            switch(transition) {
-                case "slide-fade-left":
-                    mainElement.animate({
-                        'left': '-' + $menu.width()+'px',
-                        'opacity': 0
-                    });
-                    subElement.show().animate({
-                        'left' : '0px',
-                        'opacity': 1
-                    }).addClass('active');
-					
-                break;
-                case "inside-slide-fade-left":
-                    mainElement.show().addClass('inside-slide-fade-left-animation');
-                    subElement.show().animate({
-                        'left' : '0px',
-                        'opacity': 1
-                    }, function() { mainElement.removeClass('inside-slide-fade-left-animation').hide(); }).addClass('active');
-                break;
-                case "set3":
-                    mainElement.addClass('fade-out-scale-down-animation');
-                    menuLib.hideAfterTransition(mainElement);
-                    subElement.show().addClass('fade-in-rise-up-animation active');
-                break;
-                case "set4":
-                    mainElement.addClass('fade-out-rising-up-animation');
-                    menuLib.hideAfterTransition(mainElement);
-                    subElement.show().addClass('fade-in-rising-up-animation active');
-                break;
-                case "set5":
-                    mainElement.addClass('fade-out-fall-down-animation');
-                    menuLib.hideAfterTransition(mainElement);
-                    subElement.show().addClass('fade-in-falling-down-animation active');                    
-                break;
+            if(!menuLib.detectAnimation()) {
+                //Fallback Animation for all demos in unsupporting browser
+                switch(transition) {
+                  case "slide-fade-left": case "inside-slide-fade-left": case "set3": case "set4": case "set5":
+                        menuLib.animations.slideFadeoutLeft(mainElement, "-"+$menu.width());
+                        menuLib.animations.slideFadeinLeft(subElement.show().addClass('active'), '0');
+                  break;
+                }
+            } else {
+                //Animations Supported
+                switch(transition) {
+                    case "slide-fade-left":                    
+                        menuLib.animations.slideFadeoutLeft(mainElement, "-"+$menu.width());
+                        menuLib.animations.slideFadeinLeft(subElement.show().addClass('active'), '0');
+                    break;
+                    case "inside-slide-fade-left":
+                        mainElement.show().addClass('inside-slide-fade-left-animation');
+                        menuLib.animations.slideFadeinLeft(subElement.show().addClass('active'), '0', function() {
+                            mainElement.removeClass('inside-slide-fade-left-animation').hide();
+                        });
+                    break;
+                    case "set3":
+                        mainElement.addClass('fade-out-scale-down-animation');
+                        menuLib.hideAfterTransition(mainElement);
+                        subElement.show().addClass('fade-in-rise-up-animation active');
+                    break;
+                    case "set4":
+                        mainElement.addClass('fade-out-rising-up-animation');
+                        menuLib.hideAfterTransition(mainElement);
+                        subElement.show().addClass('fade-in-rising-up-animation active');
+                    break;
+                    case "set5":
+                        mainElement.addClass('fade-out-fall-down-animation');
+                        menuLib.hideAfterTransition(mainElement);
+                        subElement.show().addClass('fade-in-falling-down-animation active');                    
+                    break;
+                }
             }
+            
+            //Animate the menu to the new height of the menu
             $menu.animate({
                 'height' : subElement.height() + $('.icon', $menu).outerHeight()
             });			
@@ -103,53 +210,63 @@
         'goToMain': function (subElement, mainElement, container, transition) {
             $('.active').removeClass('active');
             $menu = subElement.closest(container);
-            switch(transition) {
-                case "slide-fade-left":
-                    subElement.animate({
-                        'left': $menu.width()+'px',
-                        'opacity': 0
-                    });  
-                    mainElement.animate({
-                        'left' : 0,
-                        'opacity': 1
-                    }).addClass('active');
-                break;
-                case "inside-slide-fade-left":
-                    mainElement.show().addClass('inside-slide-fade-left-out-animation active');
-                    subElement.show().animate({
-                        'left': $menu.width()+'px',
-                        'opacity': 0
-                    }); //, function() { mainElement.removeClass('inside-slide-fade-left-out-animation'); });
-					
-                break;
-                case "set3":
-                    mainElement.show().addClass('fade-in-scale-up-animation active');                    
-                    subElement.addClass('fade-out-fall-down-animation');
-                    menuLib.hideAfterTransition(subElement);              
-                break;
-                case "set4":
-                    mainElement.show().addClass('fade-in-falling-down-animation active');                    
-                    subElement.addClass('fade-out-fall-down2-animation');
-                    menuLib.hideAfterTransition(subElement);              
-                break;
-                case "set5":
-                    mainElement.show().addClass('fade-in-rising-up-animation active');                    
-                    subElement.addClass('fade-out-rising-up-animation');
-                    menuLib.hideAfterTransition(subElement);  
-                break; 
+            if(!menuLib.detectAnimation()) {
+                //Fallback animation for those who dont support animation
+                switch(transition) {
+                    case "slide-fade-left": case "inside-slide-fade-left": case "set3": case "set4": case "set5":
+                        menuLib.animations.slideFadeinLeft(mainElement.show().addClass('active'), "0");
+                        menuLib.animations.slideFadeoutLeft(subElement, $menu.width());
+                    break;
+                }
+            } else {
+                //Animations Supported
+                switch(transition) {
+                    case "slide-fade-left":
+                        menuLib.animations.slideFadeinLeft(mainElement.show().addClass('active'), "0");
+                        menuLib.animations.slideFadeoutLeft(subElement, $menu.width());
+                    break;
+                    case "inside-slide-fade-left":
+                        mainElement.show().addClass('inside-slide-fade-left-out-animation active');
+                        menuLib.animations.slideFadeoutLeft(subElement, $menu.width(), function() {
+                            mainElement.removeClass('inside-slide-fade-left-out-animation');
+                        });
+                    break;
+                    case "set3":
+                        mainElement.show().addClass('fade-in-scale-up-animation active');                    
+                        subElement.addClass('fade-out-fall-down-animation');
+                        menuLib.hideAfterTransition(subElement);              
+                    break;
+                    case "set4":
+                        mainElement.show().addClass('fade-in-falling-down-animation active');                    
+                        subElement.addClass('fade-out-fall-down2-animation');
+                        menuLib.hideAfterTransition(subElement);              
+                    break;
+                    case "set5":
+                        mainElement.show().addClass('fade-in-rising-up-animation active');                    
+                        subElement.addClass('fade-out-rising-up-animation');
+                        menuLib.hideAfterTransition(subElement);  
+                    break; 
+                }
             }
+            
+            //Animate the menu to the new height of the menu
             $menu.animate({
                 'height' : mainElement.height() + $('.icon', $menu).outerHeight()
             });
         },
+        /*
+         * Helper function to hide a element once animation finishes
+         * @param {jQuery Selector} element
+         */
         'hideAfterTransition': function(element) {
             element.on(menuLib.animEnd, function() {
                 $(this).hide().off(menuLib.animEnd);
             });
         }
-    }
+    };
     
     $.fn.menu = function(options){
+        
         //Extend the options provided with default options
         var settings = $.extend({
             'mode' : 'icon',
@@ -158,76 +275,82 @@
             'transition': 'slide-fade-left',
             'status': 'closed'
         }, options);
+
+        // Event Handlers        -
         
-        // Event Handlers        
+        //Resize Handler
         $(window).on('resize', function() {
-            menuLib.resizeHander(settings.menuClass);        
+            $('.'+settings.menuClass).each(function() {
+                $(this).width($(this).parent().innerWidth());
+            });
         });
         
-        $('body').on('click', '.'+settings.menuClass + ' .icon', function() {
-            
-            main_ul = $(this).siblings('ul:first');
+        /**
+         * Click hanndler when the icon is clicked
+         * 
+         * @param {Event Object} e
+         */
+        $('body').on('click', '.'+settings.menuClass + ' .icon', function(e) {
+            e.stopPropagation();            
             $menu = $(this).closest('.' + settings.menuClass);
-            iconHeight = $(this).outerHeight();
             
             if(settings.status === 'closed') {
-                main_ul.css({ 'opacity' : 0}).show();
-                main_ul.animate({
-                   'opacity': '1',
-                   'marginTop': '0'
-                }, 200).addClass('active');
-				
-                $menu.animate({
-                    'height' : main_ul.height() + iconHeight
-                });
-                //Set the Menu's status to opened
-                settings.status = 'opened';
+                menuLib.menu.open($menu, settings);       
             } else {
-				
-                $("ul.active", $menu).removeClass('active').animate({
-                   'opacity': '0',
-                   'marginTop': '20px'
-                }, 200, function() {
-                    menuLib.resetMenu($('.'+ settings.menuClass), settings.transition);
-                });
-                $menu.animate({
-                    'height' : iconHeight
-                });
-                //Set the menu's status to closed
-                settings.status = 'closed';
+                menuLib.menu.close($menu, settings);
             }
         });
         
-        $('body').on('click', '.'+settings.menuClass + ' ul > li', function() {
+        $('body').on('click', function() {
+            menuLib.menu.close($('.'+ settings.menuClass), settings);
+        });
+       
+        /**
+         * Sub Menu on click Handler
+         * 
+         * @param {Event Object} e
+         */
+        $('body').on('click', '.'+settings.menuClass + ' ul > li', function(e) {
+            e.stopPropagation();
             if($(this).data('sub')) {
                 menuLib.goToSub($("#s"+$(this).data('sub')), $(this).parent('ul'), "."+settings.menuClass, settings.transition);                
             }
         });
         
-        $('body').on('click', '.'+settings.menuClass + ' .previous', function() {
-            if($('a', $(this)).data('main')) {                
+        /**
+         * Previous Button on click handler
+         * 
+         * @param {Event Object} e
+         */
+        $('body').on('click', '.'+settings.menuClass + ' .previous', function(e) {
+             
+           if($('a', $(this)).data('main')) {                
                 menuLib.goToMain($(this).parent('ul'), $("#m"+$('a', $(this)).data('main')).parent('ul'), "."+settings.menuClass, settings.transition);
             }
         });
         
-        $('body').on('webkitAnimationEnd oAnimationEnd MSAnimationEnd animationend', '.'+settings.menuClass + ' ul', function() {
-            c = '';
+        /**
+         * Global event handler for animation end
+         */
+        $('body').on(menuLib.animEnd, '.'+settings.menuClass + ' ul', function() {
+            c = ''; //Temp class Variable
             if($(this).hasClass('active')) c = 'active';
             if($(this).hasClass('sub')) c = c.length > 1 ? c + ' sub' : 'sub';
             $(this).attr('class', c);
         });
         
-        // Menu Processing
+        /**
+         * Menu Processing
+         */
         return $(this).each(function() {
-            var menu = this;
+            var menu = this; //Helper variable if needed [Not needed till now]
             var $m = $(this);
-			
-            $m.attr({
-                'class': settings.menuClass + " theme-" + settings.theme
-            });
-            $m.css({
-                'width': $m.parent().innerWidth() //Auto adjust to the Container's space 
-            });
+            
+            $m
+                // Add the Menu Class and Theme
+                .attr({ 'class': settings.menuClass + " theme-" + settings.theme }) 
+                //Auto adjust to the Container's space 
+                .css({ 'width': $m.parent().innerWidth() }); 
             
             /*
              * Takes out all the submenu and places them in the outside container
