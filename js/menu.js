@@ -113,7 +113,9 @@
             $("ul:first", menuContainer).css({
                 'left': '0',
                 'marginTop': '20px',
-                'opacity': '0'
+                'opacity': '0',
+                'display': 'none',
+                'color': '#000'
             });
             menuLib.resetSubListPosition(menuContainer, transition);
             
@@ -141,9 +143,9 @@
              * @param {JS Object} settings
              */
             'close': function(menu, settings) {
-                icon = menu.find('.icon');
+                icon = menu.find('.icon');  
                 menuLib.animations.slideFadeDown($("ul.active", menu).removeClass('active'), 20, function() {
-                    menuLib.resetMenu($('.'+ settings.classname), settings.transition);
+                    menuLib.resetMenu($('.'+ settings.menuClass), settings.transition);
                 });
                 menu.animate({'height': icon.outerHeight() });
                 
