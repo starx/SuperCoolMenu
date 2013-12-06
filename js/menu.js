@@ -128,10 +128,7 @@
              * @param {JS Object} settings
              */
             'open': function(menu, settings) {
-                icon = menu.find('.icon');
-                main_ul = icon.siblings('ul:first');
-                menuLib.animations.slideFadeinUp(main_ul.show().addClass('active'));
-                menu.animate({ 'height' : main_ul.height() + icon.outerHeight() }); //Animate the menu to the new height
+                menuLib.animations.slideFadeinUp($('ul:first', menu).show().addClass('active'));
                 
                 //Set the Menu's status to opened
                 settings.status = 'opened';                
@@ -143,11 +140,9 @@
              * @param {JS Object} settings
              */
             'close': function(menu, settings) {
-                icon = menu.find('.icon');  
                 menuLib.animations.slideFadeDown($("ul.active", menu).removeClass('active'), 20, function() {
                     menuLib.resetMenu($('.'+ settings.menuClass), settings.transition);
                 });
-                menu.animate({'height': icon.outerHeight() });
                 
                 //Set the Menu's status to closed
                 settings.status = 'closed';
@@ -201,12 +196,7 @@
                         subElement.show().addClass('fade-in-falling-down-animation active');                    
                     break;
                 }
-            }
-            
-            //Animate the menu to the new height of the menu
-            $menu.animate({
-                'height' : subElement.height() + $('.icon', $menu).outerHeight()
-            });			
+            }			
             
         },
         'goToMain': function (subElement, mainElement, container, transition) {
@@ -236,7 +226,7 @@
                     case "set3":
                         mainElement.show().addClass('fade-in-scale-up-animation active');                    
                         subElement.addClass('fade-out-fall-down-animation');
-                        menuLib.hideAfterTransition(subElement);              
+                        menuLib.hideAfterTransition(subElement);
                     break;
                     case "set4":
                         mainElement.show().addClass('fade-in-falling-down-animation active');                    
@@ -250,11 +240,6 @@
                     break; 
                 }
             }
-            
-            //Animate the menu to the new height of the menu
-            $menu.animate({
-                'height' : mainElement.height() + $('.icon', $menu).outerHeight()
-            });
         },
         /*
          * Helper function to hide a element once animation finishes
