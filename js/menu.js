@@ -111,11 +111,8 @@
          */
         'resetMenu': function(menuContainer, transition) {
             $("ul:first", menuContainer).css({
-                'left': '0',
                 'marginTop': '20px',
-                'opacity': '0',
-                'display': 'none',
-                'color': '#000'
+                'display': 'none'
             });
             menuLib.resetSubListPosition(menuContainer, transition);
             
@@ -246,8 +243,8 @@
          * @param {jQuery Selector} element
          */
         'hideAfterTransition': function(element) {
-            element.on(menuLib.animEnd, function() {
-                $(this).hide().off(menuLib.animEnd);
+            element.one(menuLib.animEnd, function() {
+                $(this).hide();//.off(menuLib.animEnd);
             });
         }
     };
@@ -263,7 +260,7 @@
             'status': 'closed'
         }, options);
 
-        // Event Handlers        -
+        // Event Handlers
         
         //Resize Handler
         $(window).on('resize', function() {
@@ -288,7 +285,7 @@
             }
         });
         
-        $('body').on('click', function() {
+        $('body, html').on('click', function() {
             menuLib.menu.close($('.'+ settings.menuClass), settings);
         });
        
@@ -310,8 +307,8 @@
          * @param {Event Object} e
          */
         $('body').on('click', '.'+settings.menuClass + ' .previous', function(e) {
-             
-           if($('a', $(this)).data('main')) {                
+            e.stopPropagation(); 
+			if($('a', $(this)).data('main')) {                
                 menuLib.goToMain($(this).parent('ul'), $("#m"+$('a', $(this)).data('main')).parent('ul'), "."+settings.menuClass, settings.transition);
             }
         });
@@ -320,7 +317,7 @@
          * Global event handler for animation end
          */
         $('body').on(menuLib.animEnd, '.'+settings.menuClass + ' ul', function() {
-            c = ''; //Temp class Variable
+            var c = ''; //Temp class Variable
             if($(this).hasClass('active')) c = 'active';
             if($(this).hasClass('sub')) c = c.length > 1 ? c + ' sub' : 'sub';
             $(this).attr('class', c);
