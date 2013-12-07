@@ -184,7 +184,7 @@
     -webkit-transform: translateY(30%);
   }
 }
-@keyframes fade-out-down-scale {
+@keyframes fade-out-scale-down {
   0% {
     opacity: 1;
     transform: translateY(0);
